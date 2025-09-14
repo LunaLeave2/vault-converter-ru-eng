@@ -1,3 +1,5 @@
+![tests](https://github.com/LunaLeave2/vault-converter-ru-eng/actions/workflows/tests.yml/badge.svg)
+
 Сервер и виджет конвертации валют для сайтов и внутренних порталов.
 
 - **Фиат**: официальные курсы ЕЦБ (ECB).
