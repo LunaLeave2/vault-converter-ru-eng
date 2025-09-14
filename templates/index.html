@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="{{ 'ru' if lang=='ru' else 'en' }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ 'Конвертер валют' if lang=='ru' else 'Currency Converter' }}</title>
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:#f6f7fb; display:grid; place-items:center; min-height:100svh; padding:20px;
+    }
+    .cc-widget{
+      --cc-font: 16px; --cc-bg: #ffffff; --cc-text: #111827;
+      --cc-border: #e5e7eb; --cc-accent: #0ea5e9; --cc-radius: 16px;
+      font-size: var(--cc-font); color: var(--cc-text); background: var(--cc-bg);
+      border: 1px solid var(--cc-border); border-radius: var(--cc-radius);
+      width: min(560px, 100%); padding: 1.25rem; box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    }
+    .cc-title{ display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:1.25rem; margin-bottom:0.75rem }
+    .cc-lang{ display:flex; gap:8px }
+    .cc-chip{ appearance:none; border:1px solid var(--cc-border); background:#fff; color:#6b7280;
+      border-radius:999px; padding:.4rem .8rem; font-weight:700; cursor:pointer }
+    .cc-chip.active{ background: var(--cc-accent); color:#fff; border-color: transparent }
+    .cc-row{ display:flex; gap:.75rem; flex-wrap:wrap }
+    .cc-col{ flex:1 1 220px }
+    label{ display:block; font-size:.8rem; color:#6b7280; margin:.25rem 0 }
+    input{
+      width:100%; padding:.7rem .85rem; border-radius:.65rem;
+      border:1px solid var(--cc-border); background:#fff; color:var(--cc-text); outline:none;
+    }
+    .cc-btn{
+      appearance:none; border:0; border-radius:.65rem; padding:.75rem 1rem; cursor:pointer;
+      font-weight:700; background: var(--cc-accent); color:#fff; min-width:150px
+    }
+    .cc-res{ margin-top:1rem; padding: .9rem; border-radius:.65rem; border:1px solid var(--cc-border); background:#fff }
+    .cc-err{ border-color:#fca5a5; color:#b91c1c; background:#fef2f2 }
+  </style>
+</head>
+<body>
+  <div class="cc-widget" style="{{ style_inline }}">
+    <div class="cc-title">
+      <span>{{ 'Конвертер валют' if lang=='ru' else 'Currency Converter' }}</span>
+      <div class="cc-lang">
+        <form method="get" action="/"><input type="hidden" name="lang" value="ru" />
+          <button class="cc-chip {% if lang=='ru' %}active{% endif %}">RU</button>
+        </form>
+        <form method="get" action="/"><input type="hidden" name="lang" value="en" />
+          <button class="cc-chip {% if lang=='en' %}active{% endif %}">EN</button>
+        </form>
+      </div>
+    </div>
+
+    <form method="post" action="/convert">
+      <input type="hidden" name="lang" value="{{ lang }}" />
+
+      <div class="cc-row">
+        <div class="cc-col">
+          <label>{{ 'Первая валюта' if lang=='ru' else 'From' }}</label>
+          <input name="base" list="codes" value="{{ form.base }}" placeholder="RUB" autocomplete="off" />
+        </div>
+        <div class="cc-col">
+          <label>{{ 'Вторая валюта' if lang=='ru' else 'To' }}</label>
+          <input name="quote" list="codes" value="{{ form.quote }}" placeholder="USD" autocomplete="off" />
+        </div>
+        <div style="width:180px">
+          <label>{{ 'Сумма' if lang=='ru' else 'Amount' }}</label>
+          <input name="amount" value="{{ form.amount }}" placeholder="1000" />
+        </div>
+        <div style="align-self:flex-end">
+          <button class="cc-btn">{{ 'Конвертировать' if lang=='ru' else 'Convert' }}</button>
+        </div>
+      </div>
+
+      <datalist id="codes">
+        {% set popular = [
+          'USD','EUR','RUB','GBP','JPY','CNY','KZT','UAH','TRY','CHF',
+          'CAD','AUD','NZD','PLN','SEK','NOK','DKK','CZK','HUF','ILS',
+          'AED','INR','KRW','SGD','HKD','THB','MYR','MXN','BRL','ZAR',
+          'GEL','AMD','AZN','BYN','KGS','MDL','TJS','UZS','RON',
+          'BTC','ETH','USDT','USDC','BNB','XRP','SOL','DOGE','TON'
+        ] %}
+        {% for c in popular %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </datalist>
+    </form>
+
+    {% if error %}
+      <div class="cc-res cc-err">{{ 'Ошибка' if lang=='ru' else 'Error' }}: {{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+      <div class="cc-res">
+        <div style="font-weight:700">
+          {{ result.amount_fmt }} {{ result.base }} = {{ result.result_fmt }} {{ result.quote }}
+        </div>
+        <div style="font-size:.85rem; color:#6b7280; margin-top:.25rem">
+          {{ 'Курс' if lang=='ru' else 'Rate' }}: {{ result.rate_fmt }}
+          &nbsp;|&nbsp; {{ 'Обновлено' if lang=='ru' else 'Updated' }}: {{ result.updated }}
+          &nbsp;|&nbsp; {{ 'Источник' if lang=='ru' else 'Source' }}: {{ result.source }}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
